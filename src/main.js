@@ -5,6 +5,7 @@ import router from "@/router/router";
 import Vintersection from "@/directives/Vintersection";
 import directives from "@/directives";
 import Vfocus from "@/directives/Vfocus";
+import store from "@/store";
 
 const app = createApp(App)
 
@@ -20,4 +21,5 @@ directives.forEach(directive => {
 // app.directive('focus', Vfocus)
 
 app .use(router)
+    .use(store)
     .mount('#app')
