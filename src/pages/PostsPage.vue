@@ -125,7 +125,7 @@ export default {
     };
 
     const callback = (entries, observer) => {
-      if (entries[0].isIntersecting && this.page < this.totalPagesw) {
+      if (entries[0].isIntersecting && this.page < this.totalPages) {
         this.loadMorePosts();
       }
     }
