@@ -1,22 +1,16 @@
 <template>
   <div>
-    <h1>{{$store.state.isAuth ? 'пользователь авторизован' : 'авторизируйтесь'}}</h1>
-    <h1>{{$store.state.likes}}</h1>
-    <div>
-      <my-button @click="$store.commit('incrementLikes')">Лайк</my-button>
-      <my-button @click="$store.commit('decrementLikes')">Дизлайк</my-button>
-    </div>
     <h1>Страница с постами</h1>
-    <my-input v-model="searchQuery" v-focus />
+<!--    <my-input v-model="searchQuery" v-focus />-->
     <div class="app__btns">
       <my-button
           @click="showDialog"
       >
         Создать пост
       </my-button>
-      <my-select v-model="selectedSort"
-                 :options="sortOptions"
-      />
+<!--      <my-select v-model="selectedSort"-->
+<!--                 :options="sortOptions"-->
+<!--      />-->
 
     </div>
     <my-dialog v-model:show="dialogVisible">
@@ -48,26 +42,15 @@ import PostForm from "@/components/PostForm.vue";
 import PostList from "@/components/PostList.vue";
 import MyDialog from "@/components/UI/MyDialog.vue";
 import MyButton from "@/components/UI/MyButton.vue";
-import axios from "axios";
 import MySelect from "@/components/UI/MySelect.vue";
 import MyInput from "@/components/UI/MyInput.vue";
+import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
 
 export default {
   components: {MyInput, MySelect, MyButton, MyDialog, PostList, PostForm},
   data() {
     return {
-      posts: [],
       dialogVisible: false,
-      isPostsLoading: false,
-      selectedSort: '',
-      searchQuery: '',
-      sortOptions: [
-        {value: "title", name: "По названию"},
-        {value: "body", name: "По содержимому"},
-      ],
-      page: 1,
-      limit: 10,
-      totalPages: 0,
     }
   },
   methods: {
@@ -84,55 +67,32 @@ export default {
     // changePage(pageNumber) {
     //   this.page = pageNumber;
     // },
-    async fetchPosts() {
-      this.isPostsLoading = true;
-      try {
-        const res = await axios.get("https://jsonplaceholder.typicode.com/posts",
-            {
-              params:
-                  {
-                    _page: this.page,
-                    _limit: this.limit
-                  }
-            });
-        this.totalPages = Math.ceil(res.headers['x-total-count'] / this.limit);
-        this.posts = res.data;
-      } catch (e) {
-        alert('error')
-      } finally {
-        this.isPostsLoading = false;
-      }
-    },
-    async loadMorePosts() {
-      this.page += 1
-      setTimeout(async () => {
-        try {
-          const res = await axios.get("https://jsonplaceholder.typicode.com/posts",
-              {
-                params:
-                    {
-                      _page: this.page,
-                      _limit: this.limit
-                    }
-              });
-          this.totalPages = Math.ceil(res.headers['x-total-count'] / this.limit);
-          this.posts = [...this.posts, ...res.data];
-        } catch (e) {
-          alert('error')
-        }
-      }, 100)
-    }
+    ...mapMutations ({
+      setPage: 'post/setPage'
+    }),
+    ...mapActions({
+      loadMorePosts: 'post/loadMorePosts',
+      fetchPosts: "post/fetchPosts"
+    })
   },
   mounted() {
     this.fetchPosts();
   },
   computed: {
-    sortedPosts() {
-      return [...this.posts].sort((post1, post2) => post1[this.selectedSort]?.localeCompare(post2[this.selectedSort]))
-    },
-    sortedAndSearchedPosts() {
-      return this.sortedPosts.filter((post) => post.title.toLowerCase().includes(this.searchQuery.toLowerCase()))
-    }
+    ...mapState ({
+      posts: state => state.post.posts,
+      isPostsLoading: state => state.post.isPostsLoading,
+      selectedSort: state => state.post.selectedSort,
+      searchQuery: state => state.post.searchQuery,
+      sortOptions: state => state.post.sortOptions,
+      page: state => state.post.page,
+      limit: state => state.post.limit,
+      totalPages: state => state.post.totalPages,
+    }),
+    ...mapGetters({
+      sortedPosts: 'post/sortedPosts',
+      sortedAndSearchedPosts: 'post/sortedAndSearchedPosts',
+    })
   },
   watch:{
     // page() {
